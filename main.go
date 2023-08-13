@@ -5,20 +5,43 @@ import (
 	"strconv"
 
 	"assignment-todos/docs"
-	"assignment-todos/types"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-var todos = [] types.Todo{
+
+type Todo struct {
+	ID          int    `json:"id"`
+	Description string `json:"description"`
+	Completed   bool   `json:"completed"`
+}
+
+type HTTPError struct {
+	StatusCode int `json:"code"`
+	Message string `json:"message"`
+}
+
+var todos = [] Todo{
 	{ID: 1, Description: "Buy groceries", Completed: false},
 	{ID: 2, Description: "Clean the house", Completed: true},
 	{ID: 3, Description: "Go for a run", Completed: false},
 	{ID: 4, Description: "Study for exams", Completed: false},
 	{ID: 5, Description: "Write a blog post", Completed: true},
 }
+
+
+var (
+	errorBadRequest     = HTTPError{
+		StatusCode:  http.StatusBadRequest,
+		Message: "Bad Request",
+	}
+	errorDataNotFound = HTTPError{
+		StatusCode:  http.StatusNotFound,
+		Message: "Todo not found",
+	}
+)
 
 // @title My API TODOS without Database Example
 // @version 1.0
@@ -42,7 +65,7 @@ func main() {
 	r.Run(":8080")
 }
 
-// @Summary Get all todos saja
+// @Summary Get all todos
 // @Description Get all todos
 // @Produce json
 // @Success 200 {array} Todo
@@ -56,7 +79,8 @@ func getAllTodos(c *gin.Context) {
 // @Param id path int true "Todo ID"
 // @Produce json
 // @Success 200 {object} Todo
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Router /todos/{id} [get]
 func getTodoByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -68,7 +92,7 @@ func getTodoByID(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+	c.JSON(http.StatusNotFound, errorDataNotFound)
 }
 
 // @Summary Add a new todo
@@ -77,11 +101,13 @@ func getTodoByID(c *gin.Context) {
 // @Produce json
 // @Param todo body Todo true "Todo Object"
 // @Success 200 {object} Todo
+// @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Router /todos [post]
 func addTodo(c *gin.Context) {
-	var newTodo types.Todo
+	var newTodo Todo
 	if err := c.ShouldBindJSON(&newTodo); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, errorBadRequest)
 		return
 	}
 
@@ -99,16 +125,17 @@ func addTodo(c *gin.Context) {
 // @Param id path int true "Todo ID"
 // @Param todo body Todo true "Todo Object"
 // @Success 200 {object} Todo
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Router /todos/{id} [put]
 func editTodo(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	for i, todo := range todos {
 		if todo.ID == id {
-			var updatedTodo types.Todo
+			var updatedTodo Todo
 			if err := c.ShouldBindJSON(&updatedTodo); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.JSON(http.StatusBadRequest, errorBadRequest)
 				return
 			}
 
@@ -120,14 +147,15 @@ func editTodo(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+	c.JSON(http.StatusNotFound, errorDataNotFound)
 }
 
 // @Summary Delete a todo
 // @Description Delete a todo
 // @Param id path int true "Todo ID"
 // @Success 200 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} HTTPError
+// @Failure 404 {object} HTTPError
 // @Router /todos/{id} [delete]
 func deleteTodo(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
@@ -142,5 +170,5 @@ func deleteTodo(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+	c.JSON(http.StatusNotFound, errorDataNotFound)
 }

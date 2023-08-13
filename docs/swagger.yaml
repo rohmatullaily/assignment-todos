@@ -1,4 +1,11 @@
 definitions:
+  main.HTTPError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
   main.Todo:
     properties:
       completed:
@@ -48,6 +55,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/main.Todo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.HTTPError'
       summary: Add a new todo
   /todos/{id}:
     delete:
@@ -65,12 +80,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/main.HTTPError'
       summary: Delete a todo
     get:
       description: Get todo by ID
@@ -87,12 +104,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/main.Todo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/main.HTTPError'
       summary: Get todo by ID
     put:
       consumes:
@@ -117,11 +136,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/main.Todo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.HTTPError'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/main.HTTPError'
       summary: Edit an existing todo
 swagger: "2.0"
