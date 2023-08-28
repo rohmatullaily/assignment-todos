@@ -31,17 +31,14 @@ var todos = [] Todo{
 	{ID: 5, Description: "Write a blog post", Completed: true},
 }
 
-
 var (
-	errorBadRequest     = HTTPError{
-		StatusCode:  http.StatusBadRequest,
-		Message: "Bad Request",
-	}
-	errorDataNotFound = HTTPError{
-		StatusCode:  http.StatusNotFound,
-		Message: "Todo not found",
-	}
+	errorBadRequest     = newHTTPError(http.StatusBadRequest, "Bad Request")
+	errorDataNotFound   = newHTTPError(http.StatusNotFound, "Todo not found")
 )
+
+func newHTTPError(code int, msg string) *HTTPError {
+	return &HTTPError{StatusCode: code, Message: msg}
+}
 
 // @title My API TODOS without Database Example
 // @version 1.0
